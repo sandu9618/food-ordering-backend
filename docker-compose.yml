@@ -1,0 +1,28 @@
+services:
+  mysql:
+    image: mysql:oraclelinux9
+    container_name: food_ordering_mysql
+    ports:
+      - "3307:3306"
+    environment:
+      - MYSQL_ROOT_PASSWORD=abms12##
+      - MYSQL_DATABASE=food_ordering_db
+    volumes:
+      - mysql_data:/var/lib/mysql
+  
+  redis:
+    image: redis:latest
+    container_name: food_ordering_redis
+    ports:
+      - "6379:6379"
+
+  rabbitmq:
+    image: rabbitmq:latest
+    container_name: food_ordering_rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+
+
+volumes:
+  mysql_data:
