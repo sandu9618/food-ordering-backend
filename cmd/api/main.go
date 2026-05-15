@@ -6,6 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 	"github.com/sandu9618/food-ordering-backend/internal/auth"
+	"github.com/sandu9618/food-ordering-backend/internal/category"
 	"github.com/sandu9618/food-ordering-backend/internal/database"
 	"github.com/sandu9618/food-ordering-backend/internal/middleware"
 	"github.com/sandu9618/food-ordering-backend/internal/tenant"
@@ -76,6 +77,15 @@ func main() {
 			"message": "admin access granted",
 		})
 	})
+
+	categoryRepo := &category.Repository{DB: db}
+	categoryHandler := &category.Handler{Repo: categoryRepo}
+
+	categoryRoutes := router.Group("/category")
+	{
+		categoryRoutes.POST("", categoryHandler.CreateCategory)
+		categoryRoutes.GET("", categoryHandler.GetAllCategories)
+	}
 
 	router.Run(":8080")
 }
