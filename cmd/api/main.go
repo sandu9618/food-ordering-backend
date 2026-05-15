@@ -9,6 +9,7 @@ import (
 	"github.com/sandu9618/food-ordering-backend/internal/category"
 	"github.com/sandu9618/food-ordering-backend/internal/database"
 	"github.com/sandu9618/food-ordering-backend/internal/middleware"
+	"github.com/sandu9618/food-ordering-backend/internal/product"
 	"github.com/sandu9618/food-ordering-backend/internal/tenant"
 	"github.com/sandu9618/food-ordering-backend/internal/user"
 )
@@ -27,6 +28,8 @@ func main() {
 	err = db.AutoMigrate(
 		&tenant.Tenant{},
 		&user.User{},
+		&category.Category{},
+		&product.Product{},
 	)
 	if err != nil {
 		log.Fatalf("Error migrating tenant table: %v", err)
@@ -81,10 +84,23 @@ func main() {
 	categoryRepo := &category.Repository{DB: db}
 	categoryHandler := &category.Handler{Repo: categoryRepo}
 
-	categoryRoutes := router.Group("/category")
+	categoryRoutes := admin.Group("/category")
 	{
 		categoryRoutes.POST("", categoryHandler.CreateCategory)
 		categoryRoutes.GET("", categoryHandler.GetAllCategories)
+	}
+
+	productRepo := &product.Repository{DB: db}
+	productService := &product.Service{Repo: productRepo}
+	productHandler := &product.Handler{Service: productService}
+
+	productRoutes := admin.Group("/product")
+	{
+		productRoutes.POST("", productHandler.Createproduct)
+		productRoutes.GET("", productHandler.GetAllProducts)
+		productRoutes.GET("/:id", productHandler.GetProductById)
+		productRoutes.PUT("/:id", productHandler.UpdateProduct)
+		productRoutes.DELETE("/:id", productHandler.DeleteProduct)
 	}
 
 	router.Run(":8080")
