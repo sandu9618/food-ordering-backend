@@ -6,6 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 	"github.com/sandu9618/food-ordering-backend/internal/auth"
+	"github.com/sandu9618/food-ordering-backend/internal/cart"
 	"github.com/sandu9618/food-ordering-backend/internal/category"
 	"github.com/sandu9618/food-ordering-backend/internal/database"
 	"github.com/sandu9618/food-ordering-backend/internal/middleware"
@@ -30,6 +31,8 @@ func main() {
 		&user.User{},
 		&category.Category{},
 		&product.Product{},
+		&cart.Cart{},
+		&cart.CartItem{},
 	)
 	if err != nil {
 		log.Fatalf("Error migrating tenant table: %v", err)
@@ -101,6 +104,19 @@ func main() {
 		productRoutes.GET("/:id", productHandler.GetProductById)
 		productRoutes.PUT("/:id", productHandler.UpdateProduct)
 		productRoutes.DELETE("/:id", productHandler.DeleteProduct)
+	}
+
+	customer := router.Group("/customer")
+	customer.Use(auth.AuthMiddleware())
+	customer.Use(auth.RoleMiddleware("CUSTOMER"))
+
+	cartRepo := &cart.Repository{DB: db}
+	cartHandler := &cart.Handler{Repo: cartRepo}
+
+	cartRoutes := customer.Group("/cart")
+	{
+		cartRoutes.POST("", cartHandler.AddItem)
+		cartRoutes.GET("", cartHandler.GetCart)
 	}
 
 	router.Run(":8080")
