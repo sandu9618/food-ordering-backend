@@ -26,6 +26,11 @@ func (h *Handler) AddItem(c *gin.Context) {
 		return
 	}
 
+	if req.Quantity <= 0 {
+		c.JSON(400, gin.H{"error": "quantity must be positive"})
+		return
+	}
+
 	userID := uint(c.MustGet("user_id").(float64))
 	tenantID := c.MustGet("tenant_id").(uint)
 

@@ -1,6 +1,10 @@
 package cart
 
-import "gorm.io/gorm"
+import (
+	"errors"
+
+	"gorm.io/gorm"
+)
 
 type Repository struct {
 	DB *gorm.DB
@@ -24,6 +28,10 @@ func (r *Repository) FindOrCreateCart(
 
 	if err == nil {
 		return &cart, nil
+	}
+
+	if !errors.Is(err, gorm.ErrRecordNotFound) {
+		return nil, err
 	}
 
 	cart = Cart{
@@ -51,23 +59,7 @@ func (r *Repository) GetCart(
 	userID uint,
 	tenantID uint,
 ) (*Cart, error) {
-
-	var cart Cart
-
-	err := r.DB.
-		Preload("Items").
-		Where(
-			"user_id = ? AND tenant_id = ?",
-			userID,
-			tenantID,
-		).
-		First(&cart).Error
-
-	if err != nil {
-		return nil, err
-	}
-
-	return &cart, nil
+	return r.FindOrCreateCart(userID, tenantID)
 }
 
 func (r *Repository) ClearCart(
